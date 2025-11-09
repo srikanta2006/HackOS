@@ -4,6 +4,7 @@ import { db } from '../firebaseConfig';
 import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, doc, updateDoc, arrayUnion, arrayRemove, increment } from 'firebase/firestore';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { ChatMessageSkeleton } from '../components/LoadingSkeletons.jsx';
 
 // NEW PROP: isReadOnly
 function TeamChat({ teamId, isReadOnly }) {
