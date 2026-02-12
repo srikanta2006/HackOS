@@ -1,474 +1,309 @@
 import React, { useEffect, useState } from "react";
-// eslint-disable-next-line no-unused-vars
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, useSpring, useTransform, AnimatePresence } from "framer-motion";
 
-const charactersData = [
-  { color: "#FF6B35", x: 40, y: 220, width: 95, height: 150 },
-  { color: "#2D2D2D", x: 155, y: 245, width: 85, height: 130 },
-  { color: "#FFD23F", x: 260, y: 255, width: 80, height: 120 },
-  { color: "#6C5CE7", x: 95, y: 95, width: 100, height: 160 },
+// --- CONFIGURATION ---
+const mascotsData = [
+  // BACK ROW (Tall, Darker)
+  { id: 1, color: "#334155", x: 60, width: 80, height: 180, zIndex: 1 },
+  { id: 2, color: "#475569", x: 160, width: 85, height: 190, zIndex: 1 },
+  { id: 3, color: "#64748b", x: 260, width: 80, height: 175, zIndex: 1 },
+
+  // FRONT ROW (Short, Vibrant)
+  { id: 4, color: "#f97316", x: 100, width: 90, height: 120, zIndex: 10 }, // Orange
+  { id: 5, color: "#0ea5e9", x: 220, width: 100, height: 130, zIndex: 10 }, // Blue
 ];
 
-const spring = { type: "spring", stiffness: 120, damping: 18 };
+// --- PHYSICS HOOK ---
+function useLookTarget(mousePos, isTypingPassword, showPassword, char) {
+  const lookX = useSpring(0, { stiffness: 120, damping: 20 });
+  const lookY = useSpring(0, { stiffness: 120, damping: 20 });
+  const bodyLean = useSpring(0, { stiffness: 80, damping: 25 });
 
-function clamp(v, a, b) {
-  return Math.max(a, Math.min(b, v));
-}
+  // PARANOIA CHECKER LOGIC
+  const [isChecking, setIsChecking] = useState(false);
 
-function calculateEyeAndBodyPosition(mousePos, char) {
-  if (!mousePos) return { eyeX: 0, eyeY: 0, bodyRotate: 0, bodyLean: 0 };
-
-  const centerX = char.x + char.width / 2;
-  const centerY = char.y + char.height * 0.35;
-
-  const dx = mousePos.x - centerX;
-  const dy = mousePos.y - centerY;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-  const angle = Math.atan2(dy, dx);
-
-  const eyeDistance = Math.min(distance / 40, 6);
-  const eyeX = Math.cos(angle) * eyeDistance;
-  const eyeY = Math.sin(angle) * eyeDistance;
-
-  const bodyLean = clamp(dx / 30, -18, 18);
-  const bodyRotate = clamp(dx / 40, -8, 8);
-
-  return { eyeX, eyeY, bodyRotate, bodyLean };
-}
-
-function useRandomBlink(enabled = true) {
-  const [isBlinking, setIsBlinking] = useState(false);
+  // Randomly toggle 'isChecking' when in Peek Mode
   useEffect(() => {
-    if (!enabled) return;
-    let timeoutId;
-    function schedule() {
-      const t = 2200 + Math.random() * 3800;
-      timeoutId = setTimeout(() => {
-        setIsBlinking(true);
-        const dur = 80 + Math.random() * 100;
-        setTimeout(() => {
-          setIsBlinking(false);
-          schedule();
-        }, dur);
-      }, t);
+    if (isTypingPassword && !showPassword) {
+      const duration = isChecking ? 600 : 1000 + Math.random() * 2000; // Check quickly (600ms), wait longer (1-3s)
+      const timeout = setTimeout(() => {
+        setIsChecking(!isChecking);
+      }, duration);
+      return () => clearTimeout(timeout);
+    } else {
+      setIsChecking(false);
     }
-    schedule();
-    return () => clearTimeout(timeoutId);
-  }, [enabled]);
-  return isBlinking;
+  }, [isTypingPassword, showPassword, isChecking]);
+
+
+  useEffect(() => {
+    let targetX = 0;
+    let targetY = 0;
+    let lean = 0;
+
+    // SCENARIO 1: SECRET PEEK (Typing + Hidden) -> "Paranoid Check"
+    if (isTypingPassword && !showPassword) {
+      const centerX = 200;
+
+      if (isChecking) {
+        // CHECKING: Eyes dart to current input
+        targetX = (centerX - char.x) / 3.5;
+        targetY = 10;
+        lean = (centerX - char.x) / 50; // Minimal lean
+      } else {
+        // INNOCENT: Look slightly up/away (Acting cool)
+        targetX = 0;
+        targetY = -15; // Whistle/Look Up
+        lean = 0; // Upright
+      }
+
+    }
+    // SCENARIO 2: SHY/WHISTLING (Funny) -> "Nothing to see here"
+    else if (showPassword) {
+      const centerX = 200;
+      targetX = (char.x - centerX) / 3;
+      targetY = -30;
+      lean = (char.x - centerX) / 8;
+    }
+    // SCENARIO 3: IDLE
+    else if (mousePos) {
+      const dx = mousePos.x - (char.x + char.width / 2);
+      const dy = mousePos.y - (300);
+      targetX = Math.min(Math.max(dx / 30, -15), 15);
+      targetY = Math.min(Math.max(dy / 30, -12), 12);
+      lean = dx / 80;
+    }
+
+    lookX.set(targetX);
+    lookY.set(targetY);
+    bodyLean.set(lean);
+
+  }, [mousePos, isTypingPassword, showPassword, isChecking, char, lookX, lookY, bodyLean]);
+
+  return { lookX, lookY, bodyLean, isChecking };
 }
 
-function Character({ index, char, mousePos, isTypingPassword, showPassword, loginState, justToggledPassword }) {
-  const isBlinking = useRandomBlink(loginState === 'idle');
-  const { eyeX, eyeY, bodyRotate, bodyLean } = calculateEyeAndBodyPosition(mousePos, char);
+// --- FACE COMPONENT ---
+const Face = ({ state, isChecking }) => {
+  // STATES: 'idle', 'peek' (secret), 'shy' (whistle), 'success', 'error'
 
-  let headVariants = {
-    idle: { x: bodyLean, rotate: bodyRotate, y: 0, scale: 1 },
-    error: { y: 6, scale: 0.98, rotate: 0, x: 0 },
-    success: { y: -10, scale: 1.03, rotate: 0, x: 0 },
+  // MUSIC NOTES FOR WHISTLING
+  const [noteKey, setNoteKey] = useState(0);
+  useEffect(() => {
+    if (state === 'shy' || (state === 'peek' && !isChecking)) { // Whistle if Shy OR Innocent Peek
+      const interval = setInterval(() => setNoteKey(k => k + 1), 800);
+      return () => clearInterval(interval);
+    }
+  }, [state, isChecking]);
+
+  // EYE VARIANTS
+  const eyes = {
+    idle: (
+      <>
+        <motion.div className="w-3 h-4 bg-black/90 rounded-full relative overflow-hidden"><div className="absolute top-1 left-1 w-1 h-1 bg-white rounded-full" /></motion.div>
+        <div className="w-1" />
+        <motion.div className="w-3 h-4 bg-black/90 rounded-full relative overflow-hidden"><div className="absolute top-1 left-1 w-1 h-1 bg-white rounded-full" /></motion.div>
+      </>
+    ),
+    peek: (
+      <>
+        {/* DYNAMIC EYES */}
+        {isChecking ? (
+          // CHECKING: Squinted Side Eye
+          <div className="flex gap-1">
+            <div className="w-4 h-4 bg-white border-2 border-black/90 rounded-full relative overflow-hidden flex items-center justify-center">
+              <div className="absolute top-0 w-full h-1/2 bg-black/10 z-10" />
+              <div className="w-1.5 h-1.5 bg-black rounded-full translate-y-[1px]" />
+            </div>
+            <div className="w-4 h-4 bg-white border-2 border-black/90 rounded-full relative overflow-hidden flex items-center justify-center">
+              <div className="absolute top-0 w-full h-1/2 bg-black/10 z-10" />
+              <div className="w-1.5 h-1.5 bg-black rounded-full translate-y-[1px]" />
+            </div>
+          </div>
+        ) : (
+          // INNOCENT: Normal Eyes Looking Up
+          <div className="flex gap-1">
+            <motion.div className="w-3 h-4 bg-black/90 rounded-full relative overflow-hidden"><div className="absolute top-1 left-1 w-1 h-1 bg-white rounded-full" /></motion.div>
+            <motion.div className="w-3 h-4 bg-black/90 rounded-full relative overflow-hidden"><div className="absolute top-1 left-1 w-1 h-1 bg-white rounded-full" /></motion.div>
+          </div>
+        )}
+      </>
+    ),
+    shy: (
+      <>
+        {/* SHIFTY EYES */}
+        <motion.div
+          animate={{ x: [-3, 3, -3] }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+          className="w-3 h-4 bg-black/90 rounded-full relative overflow-hidden"
+        >
+          <div className="absolute top-1 left-1 w-1 h-1 bg-white rounded-full" />
+        </motion.div>
+        <div className="w-1" />
+        <motion.div
+          animate={{ x: [-3, 3, -3] }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+          className="w-3 h-4 bg-black/90 rounded-full relative overflow-hidden"
+        >
+          <div className="absolute top-1 left-1 w-1 h-1 bg-white rounded-full" />
+        </motion.div>
+      </>
+    ),
+    success: (
+      <>
+        <svg width="30" height="10" viewBox="0 0 30 10" className="overflow-visible">
+          <path d="M 0 10 Q 5 0 10 10" stroke="black" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <path d="M 20 10 Q 25 0 30 10" stroke="black" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        </svg>
+      </>
+    ),
+    error: (
+      <>
+        <div className="text-red-600 font-black text-xs">X</div>
+        <div className="w-2" />
+        <div className="text-red-600 font-black text-xs">X</div>
+      </>
+    )
   };
 
-  const peekOffset = 6 + index * 4;
-  let stateKey = "idle";
-  let extraTransform = {};
-
-  if (loginState === "error") {
-    stateKey = "error";
-  } else if (loginState === "success") {
-    stateKey = "success";
-  } else if (isTypingPassword && !showPassword) {
-    stateKey = "idle";
-    extraTransform = { x: peekOffset + 10, rotate: 8 + index * 2 };
-  } else if (isTypingPassword && showPassword) {
-    stateKey = "idle";
-    extraTransform = { x: -15 - index * 3, rotate: -12 - index * 3, scale: 0.98 };
-  }
-
-  let pupilSize = { width: 18, height: 18, marginLeft: 0 };
-  if (isTypingPassword && showPassword) pupilSize = { width: 14, height: 18, marginLeft: 8 };
-  if (justToggledPassword && showPassword) pupilSize = { width: 20, height: 20, marginLeft: 0 };
-
-  let leftEyeTransform = { x: eyeX, y: eyeY };
-  let rightEyeTransform = { x: eyeX, y: eyeY };
-
-  if (loginState === "error") {
-    leftEyeTransform = { x: 0, y: 5 };
-    rightEyeTransform = { x: 0, y: 5 };
-  } else if (isTypingPassword && !showPassword) {
-    leftEyeTransform = { x: 6, y: 0 };
-    rightEyeTransform = { x: 6, y: 0 };
-  } else if (isTypingPassword && showPassword) {
-    leftEyeTransform = { x: -7, y: 1 };
-    rightEyeTransform = { x: -7, y: 1 };
-  }
+  // MOUTH VARIANTS
+  const mouth = {
+    idle: <div className="w-1 h-0.5 bg-black/40 rounded-full" />,
+    peek: (
+      // Toggle Smirk (Check) vs Whistle (Innocent)
+      isChecking ?
+        <div className="w-3 h-1 bg-black/80 rounded-full -rotate-6 translate-x-1" /> // Smirk
+        :
+        <div className="w-2 h-2 border-2 border-black/60 rounded-full bg-transparent" /> // Whistle
+    ),
+    shy: (
+      <div className="w-2 h-2 border-2 border-black/60 rounded-full bg-transparent" />
+    ),
+    success: (
+      <svg width="16" height="8" viewBox="0 0 16 8">
+        <path d="M 0 0 Q 8 12 16 0" stroke="black" strokeWidth="2" fill="none" strokeLinecap="round" />
+      </svg>
+    ),
+    error: <div className="w-4 h-1 bg-black/80 rounded-full rotate-6" />
+  };
 
   return (
-    <motion.div
-      initial={false}
-      animate={{ ...headVariants[stateKey], ...extraTransform }}
-      transition={spring}
-      style={{
-        left: char.x,
-        top: char.y,
-        width: char.width,
-        height: char.height,
-        position: "absolute",
-        transformOrigin: "center center"
-      }}
-      className="absolute"
-    >
-      {/* Body */}
-      <motion.div
-        className="absolute inset-0 rounded-b-3xl"
-        style={{
-          backgroundColor: char.color,
-          top: `${char.height * 0.35}px`,
-          borderRadius: "0 0 24px 24px",
-          boxShadow: "0 6px 12px rgba(0,0,0,0.15)"
-        }}
-        animate={{ y: [0, -1.5, 0] }}
-        transition={{ duration: 3 + index * 0.2, repeat: Infinity, ease: "easeInOut" }}
-      />
+    <div className="flex flex-col items-center gap-1 scale-125">
 
-      {/* Head */}
-      <div
-        style={{
-          height: `${char.height * 0.42}px`,
-          backgroundColor: char.color,
-          borderRadius: "50% 50% 0 0",
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
-        }}
-      >
-        {/* Eyebrows */}
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-7">
-          {loginState === "error" ? (
-            <>
-              <motion.div
-                className="w-10 h-1.5 bg-black/90 rounded-full"
-                style={{ transform: "rotate(18deg) translateY(-2px)" }}
-                initial={{ scaleX: 1 }}
-                animate={{ scaleX: [1, 0.95, 1] }}
-                transition={{ duration: 0.3 }}
-              />
-              <motion.div
-                className="w-10 h-1.5 bg-black/90 rounded-full"
-                style={{ transform: "rotate(-18deg) translateY(-2px)" }}
-                initial={{ scaleX: 1 }}
-                animate={{ scaleX: [1, 0.95, 1] }}
-                transition={{ duration: 0.3 }}
-              />
-            </>
-          ) : isTypingPassword && showPassword ? (
-            <>
-              <motion.div
-                className="w-10 h-1.5 bg-black/90 rounded-full"
-                animate={{ rotate: -15, y: -3 }}
-                transition={spring}
-              />
-              <motion.div
-                className="w-10 h-1.5 bg-black/90 rounded-full"
-                animate={{ rotate: 15, y: -3 }}
-                transition={spring}
-              />
-            </>
-          ) : loginState === "success" ? (
-            <>
-              <motion.div
-                className="w-10 h-1.5 bg-black/90 rounded-full"
-                animate={{ rotate: -12 }}
-                transition={spring}
-              />
-              <motion.div
-                className="w-10 h-1.5 bg-black/90 rounded-full"
-                animate={{ rotate: 12 }}
-                transition={spring}
-              />
-            </>
-          ) : (
-            <>
-              <div className="w-10 h-1.5 bg-black/90 rounded-full" />
-              <div className="w-10 h-1.5 bg-black/90 rounded-full" />
-            </>
-          )}
-        </div>
-
-        {/* Eyes container */}
-        <div className="absolute w-full left-0 right-0 top-1/2 -translate-y-1/2 flex items-center justify-center">
-          <div className="flex gap-5">
-            {loginState === "success" ? (
-              // Happy closed eyes - curved smile shape
-              <>
-                <motion.div
-                  className="w-11 h-6 flex items-center justify-center"
-                  initial={{ scaleY: 1 }}
-                  animate={{ scaleY: 0.3 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <svg width="40" height="16" viewBox="0 0 40 16">
-                    <path d="M 5 2 Q 20 14 35 2" stroke="black" strokeWidth="3" fill="none" strokeLinecap="round" />
-                  </svg>
-                </motion.div>
-                <motion.div
-                  className="w-11 h-6 flex items-center justify-center"
-                  initial={{ scaleY: 1 }}
-                  animate={{ scaleY: 0.3 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <svg width="40" height="16" viewBox="0 0 40 16">
-                    <path d="M 5 2 Q 20 14 35 2" stroke="black" strokeWidth="3" fill="none" strokeLinecap="round" />
-                  </svg>
-                </motion.div>
-              </>
-            ) : (
-              <>
-                {/* LEFT EYE */}
-                <div className="relative w-11 h-11 bg-white rounded-full flex items-center justify-center border-2 border-gray-800 overflow-hidden">
-                  <motion.div
-                    animate={{ x: leftEyeTransform.x, y: leftEyeTransform.y }}
-                    transition={spring}
-                    style={{
-                      width: pupilSize.width,
-                      height: pupilSize.height,
-                      marginLeft: pupilSize.marginLeft
-                    }}
-                    className="bg-gray-900 rounded-full"
-                  />
-                </div>
-
-                {/* RIGHT EYE */}
-                <div className="relative w-11 h-11 bg-white rounded-full flex items-center justify-center border-2 border-gray-800 overflow-hidden">
-                  <motion.div
-                    animate={{ x: rightEyeTransform.x, y: rightEyeTransform.y }}
-                    transition={spring}
-                    style={{
-                      width: pupilSize.width,
-                      height: pupilSize.height,
-                      marginLeft: pupilSize.marginLeft
-                    }}
-                    className="bg-gray-900 rounded-full"
-                  />
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Enhanced Blinking Animation - Eyelids from top and bottom */}
-        <AnimatePresence>
-          {isBlinking && loginState !== "success" && (
-            <>
-              {/* Top Eyelid */}
-              <motion.div
-                initial={{ y: -50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -50, opacity: 0 }}
-                transition={{ duration: 0.08, ease: "easeInOut" }}
-                className="absolute left-0 right-0 top-0 h-1/2 bg-gradient-to-b from-gray-900/95 to-transparent pointer-events-none"
-                style={{
-                  borderRadius: "50% 50% 0 0",
-                  backdropFilter: "blur(1px)"
-                }}
-              />
-
-              {/* Bottom Eyelid */}
-              <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 50, opacity: 0 }}
-                transition={{ duration: 0.08, ease: "easeInOut" }}
-                className="absolute left-0 right-0 bottom-0 h-1/2 bg-gradient-to-t from-gray-900/95 to-transparent pointer-events-none"
-                style={{
-                  borderRadius: "0 0 50% 50%",
-                  backdropFilter: "blur(1px)"
-                }}
-              />
-
-              {/* Eyelid line in the middle */}
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                exit={{ scaleX: 0 }}
-                transition={{ duration: 0.06 }}
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-0.5 bg-gray-900 rounded-full pointer-events-none"
-              />
-            </>
-          )}
-        </AnimatePresence>
-
-        {/* Blush when happy or embarrassed */}
-        {(loginState === "success" || (isTypingPassword && showPassword)) && (
+      {/* BROWS (Only when checking) */}
+      <div className="h-1 w-full flex justify-center gap-1 opacity-70">
+        {state === 'peek' && isChecking && (
           <>
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 0.5 }}
-              className="absolute left-2 top-1/2 w-7 h-5 bg-pink-400/60 rounded-full blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 0.5 }}
-              className="absolute right-2 top-1/2 w-7 h-5 bg-pink-400/60 rounded-full blur-sm"
-            />
+            <div className="w-2 h-[2px] bg-black rotate-6 translate-y-1" />
+            <div className="w-2 h-[2px] bg-black -rotate-6 translate-y-1" />
           </>
         )}
       </div>
 
-      {/* Mouth */}
-      <div className="absolute left-0 right-0 bottom-14 flex items-center justify-center pointer-events-none">
-        {loginState === "error" ? (
-          <motion.svg
-            width="50"
-            height="25"
-            viewBox="0 0 50 25"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <motion.path
-              d="M 8 18 Q 25 8 42 18"
-              stroke="black"
-              strokeWidth="3"
-              fill="none"
-              strokeLinecap="round"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-            />
-          </motion.svg>
-        ) : loginState === "success" ? (
-          <motion.div
-            initial={{ scale: 0.8, y: 5 }}
-            animate={{ scale: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 15 }}
-          >
-            <svg width="60" height="30" viewBox="0 0 60 30">
-              <motion.path
-                d="M 8 8 Q 30 28 52 8"
-                stroke="black"
-                strokeWidth="3"
-                fill="none"
-                strokeLinecap="round"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 0.4, delay: 0.1 }}
-              />
-            </svg>
-          </motion.div>
-        ) : (
-          <svg width="45" height="20" viewBox="0 0 45 20">
-            <path d="M 8 10 Q 22.5 15 37 10" stroke="black" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          </svg>
-        )}
+      {/* EYES */}
+      <div className="flex items-center justify-center h-5">
+        {eyes[state] || eyes.idle}
       </div>
 
-      {/* Tear drop for error */}
-      {loginState === "error" && (
-        <motion.div
-          initial={{ y: -10, opacity: 0, scale: 0 }}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 10 }}
-          className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-blue-400 text-base"
-        >
-          💧
-        </motion.div>
-      )}
+      {/* MOUTH */}
+      <div className="mt-1 h-3 flex items-start justify-center relative">
+        {mouth[state] || mouth.idle}
 
-      {/* Sparkle for success */}
-      {loginState === "success" && (
+        {/* ANIMATED MUSIC NOTE (Whistling when Shy OR Innocent Peek) */}
+        <AnimatePresence>
+          {(state === 'shy' || (state === 'peek' && !isChecking)) && (
+            <motion.div
+              key={noteKey}
+              initial={{ y: 0, x: 0, opacity: 0, scale: 0 }}
+              animate={{ y: -20, x: (noteKey % 2 === 0 ? 10 : -10), opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2 }}
+              className="absolute -top-1 left-1/2 text-cyan-400 font-bold text-xs pointer-events-none"
+            >
+              ♪
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+    </div>
+  );
+};
+
+
+// --- MASCOT COMPONENT ---
+function Mascot({ char, mousePos, isTypingPassword, showPassword, loginState }) {
+  const { lookX, lookY, bodyLean, isChecking } = useLookTarget(mousePos, isTypingPassword, showPassword, char);
+
+  let faceState = 'idle';
+  if (loginState === 'success') faceState = 'success';
+  else if (loginState === 'error') faceState = 'error';
+  else if (showPassword) faceState = 'shy';
+  else if (isTypingPassword) faceState = 'peek';
+
+  const scaleY = useTransform(bodyLean, [-15, 15], [0.95, 1.05]);
+
+  const headRotate = useTransform(lookX, [-15, 15], [-5, 5]);
+
+  return (
+    <motion.div
+      style={{
+        position: "absolute",
+        left: char.x,
+        bottom: 20,
+        width: char.width,
+        height: char.height,
+        zIndex: char.zIndex,
+        rotate: bodyLean,
+        scaleY: scaleY,
+        transformOrigin: "bottom center"
+      }}
+    >
+      <div className="absolute -bottom-1 left-2 right-2 h-3 bg-black/40 rounded-full blur-sm" />
+
+      <motion.div
+        className="w-full h-full relative overflow-visible shadow-xl"
+        style={{
+          backgroundColor: char.color,
+          borderRadius: "50% 50% 0 0",
+        }}
+        animate={{ scaleY: [1, 1.02, 1] }}
+        transition={{ duration: 2 + char.id, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <div className="absolute top-4 left-4 w-1/3 h-1/4 bg-white/10 rounded-full rotate-12 blur-[1px]" />
+
+        {/* FACE CONTAINER */}
         <motion.div
-          initial={{ opacity: 0, y: 10, scale: 0.5, rotate: -45 }}
-          animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
-          transition={{ delay: index * 0.08, duration: 0.5, type: "spring" }}
-          className="absolute -top-8 left-1/2 -translate-x-1/2 text-2xl pointer-events-none drop-shadow-lg"
+          className="absolute top-[20%] left-0 right-0 flex justify-center items-center"
+          style={{ x: lookX, y: lookY, rotate: headRotate }}
         >
-          ✨
+          <Face state={faceState} isChecking={isChecking} />
         </motion.div>
-      )}
+      </motion.div>
     </motion.div>
   );
 }
 
-// Main Component - Export this for your login/register pages
-export default function AnimatedMascots({ mousePos, isTypingPassword, showPassword, loginState, justToggledPassword }) {
+// --- MAIN CONTAINER ---
+export default function AnimatedMascots({ mousePos, isTypingPassword, showPassword, loginState }) {
   return (
     <div className="relative w-full h-full">
-      {/* Background gradients */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5" />
-      <div className="absolute bottom-0 w-full h-1/3 bg-gradient-to-t from-slate-950/20 to-transparent" />
+      <div className="absolute bottom-[20px] left-10 right-10 h-[2px] bg-white/10 rounded-full" />
 
-      {/* Characters Container */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative" style={{ width: '400px', height: '400px' }}>
-          {charactersData.map((char, i) => (
-            <Character
-              key={i}
-              index={i}
+        <div className="relative w-[400px] h-[400px]">
+          {mascotsData.map((char) => (
+            <Mascot
+              key={char.id}
               char={char}
               mousePos={mousePos}
               isTypingPassword={isTypingPassword}
               showPassword={showPassword}
               loginState={loginState}
-              justToggledPassword={justToggledPassword}
             />
           ))}
         </div>
       </div>
-
-      {/* Success Celebration Overlay */}
-      <AnimatePresence>
-        {loginState === "success" && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
-          >
-            <motion.div
-              initial={{ scale: 0.5, rotate: -20 }}
-              animate={{
-                scale: [1, 1.3, 1.1],
-                rotate: [0, 10, -10, 0]
-              }}
-              transition={{
-                duration: 0.8,
-                times: [0, 0.5, 1],
-                ease: "easeInOut"
-              }}
-              className="text-9xl drop-shadow-2xl"
-            >
-              🎉
-            </motion.div>
-
-            {/* Floating sparkles */}
-            {[...Array(6)].map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{
-                  opacity: [0, 1, 0],
-                  scale: [0, 1.5, 0],
-                  x: [0, (i % 2 ? 1 : -1) * (50 + i * 20)],
-                  y: [0, -50 - i * 15]
-                }}
-                transition={{
-                  duration: 1.2,
-                  delay: i * 0.1,
-                  ease: "easeOut"
-                }}
-                className="absolute text-4xl"
-                style={{
-                  left: '50%',
-                  top: '50%'
-                }}
-              >
-                {i % 3 === 0 ? '✨' : i % 3 === 1 ? '⭐' : '💫'}
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
