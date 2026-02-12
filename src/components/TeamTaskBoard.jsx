@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
-import { 
-  collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp 
+import {
+  collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp
 } from 'firebase/firestore';
 
 function TeamTaskBoard({ teamId, teamMembers, isReadOnly }) {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const tasksRef = collection(db, 'lftPosts', teamId, 'tasks');
@@ -15,7 +14,8 @@ function TeamTaskBoard({ teamId, teamMembers, isReadOnly }) {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const tasksData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setTasks(tasksData);
-      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching tasks:", error);
     });
     return () => unsubscribe();
   }, [teamId]);
@@ -56,17 +56,17 @@ function TeamTaskBoard({ teamId, teamMembers, isReadOnly }) {
     // --- NEW: Dynamic Colors based on Status ---
     let statusColors = "bg-gray-700 border-transparent"; // Default
     if (task.status === 'todo') {
-        statusColors = "bg-red-500/10 border-red-500/30 hover:bg-red-500/20";
+      statusColors = "bg-red-500/10 border-red-500/30 hover:bg-red-500/20";
     } else if (task.status === 'inprogress') {
-        statusColors = "bg-orange-500/10 border-orange-500/30 hover:bg-orange-500/20";
+      statusColors = "bg-orange-500/10 border-orange-500/30 hover:bg-orange-500/20";
     } else if (task.status === 'done') {
-        statusColors = "bg-green-500/10 border-green-500/30 hover:bg-green-500/20";
+      statusColors = "bg-green-500/10 border-green-500/30 hover:bg-green-500/20";
     }
 
     return (
       <div className={`${statusColors} border p-3 rounded-lg mb-3 shadow-sm transition-all group relative`}>
         <p className="text-gray-200 mb-3 font-medium">{task.title}</p>
-        
+
         <div className="mb-3 flex items-center gap-2">
           {assignee ? (
             <img src={assignee.photoURL || `https://api.dicebear.com/9.x/initials/svg?seed=${assignee.id}`} alt={assignee.displayName} className="w-6 h-6 rounded-full border border-gray-600" title={`Assigned to ${assignee.displayName}`} />
@@ -89,8 +89,8 @@ function TeamTaskBoard({ teamId, teamMembers, isReadOnly }) {
         {!isReadOnly && (
           <div className="flex justify-between items-center bg-black/20 p-2 rounded-md text-xs">
             <div>
-               {task.status === 'inprogress' && <button onClick={() => handleMoveTask(task.id, 'todo')} className="text-gray-400 hover:text-white px-1">← To Do</button>}
-               {task.status === 'done' && <button onClick={() => handleMoveTask(task.id, 'inprogress')} className="text-gray-400 hover:text-white px-1">← In Progress</button>}
+              {task.status === 'inprogress' && <button onClick={() => handleMoveTask(task.id, 'todo')} className="text-gray-400 hover:text-white px-1">← To Do</button>}
+              {task.status === 'done' && <button onClick={() => handleMoveTask(task.id, 'inprogress')} className="text-gray-400 hover:text-white px-1">← In Progress</button>}
             </div>
             <button onClick={() => handleDeleteTask(task.id)} className="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">🗑️</button>
             <div>
@@ -120,25 +120,25 @@ function TeamTaskBoard({ teamId, teamMembers, isReadOnly }) {
       </form>
 
       <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 overflow-hidden min-h-0 h-full">
-        
+
         <div className="bg-gray-800 p-4 rounded-lg flex flex-col h-full overflow-hidden">
           <h3 className="text-lg font-bold text-gray-300 mb-4 border-b-2 border-red-500/50 pb-2 shrink-0">To Do 📌 ({tasks.filter(t => t.status === 'todo').length})</h3>
           <div className="flex-1 overflow-y-auto min-h-0 pr-1 custom-scrollbar">
-             {tasks.filter(t => t.status === 'todo').map(task => <TaskCard key={task.id} task={task} />)}
+            {tasks.filter(t => t.status === 'todo').map(task => <TaskCard key={task.id} task={task} />)}
           </div>
         </div>
 
         <div className="bg-gray-800 p-4 rounded-lg flex flex-col h-full overflow-hidden">
           <h3 className="text-lg font-bold text-gray-300 mb-4 border-b-2 border-orange-500/50 pb-2 shrink-0">In Progress 🚧 ({tasks.filter(t => t.status === 'inprogress').length})</h3>
           <div className="flex-1 overflow-y-auto min-h-0 pr-1 custom-scrollbar">
-             {tasks.filter(t => t.status === 'inprogress').map(task => <TaskCard key={task.id} task={task} />)}
+            {tasks.filter(t => t.status === 'inprogress').map(task => <TaskCard key={task.id} task={task} />)}
           </div>
         </div>
 
         <div className="bg-gray-800 p-4 rounded-lg flex flex-col h-full overflow-hidden">
           <h3 className="text-lg font-bold text-gray-300 mb-4 border-b-2 border-green-500/50 pb-2 shrink-0">Done ✅ ({tasks.filter(t => t.status === 'done').length})</h3>
           <div className="flex-1 overflow-y-auto min-h-0 pr-1 custom-scrollbar">
-             {tasks.filter(t => t.status === 'done').map(task => <TaskCard key={task.id} task={task} />)}
+            {tasks.filter(t => t.status === 'done').map(task => <TaskCard key={task.id} task={task} />)}
           </div>
         </div>
 

@@ -1,91 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* --- GLOBAL STYLES --- */
 @layer base {
   html {
-    /* Nicer dark mode background */
-    @apply bg-[#0a0e17] text-gray-100;
-    /* Smoother font rendering on Mac/iOS */
+    font-family: 'Outfit', sans-serif;
+    @apply bg-[#030712] text-gray-200;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
   }
 
-  /* Standardize headings */
-  h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight font-bold;
+  body {
+    @apply overflow-x-hidden;
+    /* Fancy background glow */
+    background-image:
+      radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+      radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 0.1) 0, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 0.05) 0, transparent 50%);
+  }
+
+  ::selection {
+    @apply bg-cyan-500/30 text-cyan-200;
   }
 }
 
-/* --- CUSTOM UTILITIES --- */
 @layer utilities {
-  /* Hide scrollbar but keep functionality */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+  .neo-glow {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.15), 0 0 40px rgba(6, 182, 212, 0.1);
   }
 
-  /* A nice custom scrollbar for when we DO want one */
+  .neo-glow-purple {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.15), 0 0 40px rgba(168, 85, 247, 0.1);
+  }
+
+  .glass-border {
+    @apply border border-white/10;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+  }
+
+  /* Custom Scrollbar */
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
   }
+
   .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-gray-900 rounded-full;
+    @apply bg-transparent;
   }
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-gray-700 rounded-full hover:bg-gray-600;
+    @apply bg-white/10 rounded-full hover:bg-white/20 transition-all;
   }
 }
 
-/* --- STREAM CHAT OVERRIDES (Optional, if needed later) --- */
-/* .str-chat { ... } */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
+/* Animations */
+@keyframes nebula {
+
+  0%,
   100% {
-    background-position: 200% 0;
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
   }
 }
 
-.animate-shimmer {
-  animation: shimmer 2s infinite linear;
+.animate-nebula {
+  animation: nebula 20s infinite linear;
 }
-/* Add after your existing @tailwind directives */
 
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
+@keyframes float {
+
+  0%,
   100% {
-    background-position: 200% 0;
-  }
-}
-
-.animate-shimmer {
-  animation: shimmer 2s infinite linear;
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
     transform: translateY(0);
   }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
-}
-
-.scale-98 {
-  transform: scale(0.98);
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }

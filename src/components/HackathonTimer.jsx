@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { cn, getBadge } from '../design-system/theme.js';
+import { cn } from '../design-system/theme.js';
 
 function HackathonTimer({ endsAt }) {
   const [timeLeft, setTimeLeft] = useState(0);
@@ -11,18 +11,18 @@ function HackathonTimer({ endsAt }) {
       const now = Date.now();
       const end = endsAt.toMillis ? endsAt.toMillis() : endsAt;
       const diff = end - now;
-      
+
       if (diff <= 0) {
         setTimeLeft(0);
         return;
       }
-      
+
       setTimeLeft(diff);
-      
+
       // Set urgency levels
       const oneHour = 60 * 60 * 1000;
       const threeHours = 3 * 60 * 60 * 1000;
-      
+
       setIsCritical(diff <= oneHour);
       setIsUrgent(diff <= threeHours && diff > oneHour);
     };
@@ -57,11 +57,6 @@ function HackathonTimer({ endsAt }) {
     return 'text-green-500';
   };
 
-  const getGlowClass = () => {
-    if (isCritical) return 'shadow-red-500/50';
-    if (isUrgent) return 'shadow-yellow-500/50';
-    return 'shadow-green-500/30';
-  };
 
   const getBgGlowClass = () => {
     if (isCritical) return 'from-red-500/20 to-red-600/20';
@@ -87,7 +82,7 @@ function HackathonTimer({ endsAt }) {
   if (timeLeft <= 0) {
     return (
       <div className="flex items-center gap-2">
-        <span className={getBadge('danger')}>
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
           ⏰ Time's Up!
         </span>
       </div>
@@ -107,9 +102,9 @@ function HackathonTimer({ endsAt }) {
       {/* Main timer container */}
       <div className="relative">
         {/* SVG Circle Progress */}
-        <svg 
-          width={size} 
-          height={size} 
+        <svg
+          width={size}
+          height={size}
           className="transform -rotate-90"
         >
           {/* Background circle */}
@@ -122,7 +117,7 @@ function HackathonTimer({ endsAt }) {
             strokeWidth={strokeWidth}
             className="text-gray-800"
           />
-          
+
           {/* Progress circle */}
           <circle
             cx={size / 2}

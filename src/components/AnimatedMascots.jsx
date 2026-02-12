@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 
 const charactersData = [
@@ -106,55 +107,55 @@ function Character({ index, char, mousePos, isTypingPassword, showPassword, logi
       initial={false}
       animate={{ ...headVariants[stateKey], ...extraTransform }}
       transition={spring}
-      style={{ 
-        left: char.x, 
-        top: char.y, 
-        width: char.width, 
-        height: char.height, 
-        position: "absolute", 
-        transformOrigin: "center center" 
+      style={{
+        left: char.x,
+        top: char.y,
+        width: char.width,
+        height: char.height,
+        position: "absolute",
+        transformOrigin: "center center"
       }}
       className="absolute"
     >
       {/* Body */}
       <motion.div
         className="absolute inset-0 rounded-b-3xl"
-        style={{ 
-          backgroundColor: char.color, 
-          top: `${char.height * 0.35}px`, 
-          borderRadius: "0 0 24px 24px", 
-          boxShadow: "0 6px 12px rgba(0,0,0,0.15)" 
+        style={{
+          backgroundColor: char.color,
+          top: `${char.height * 0.35}px`,
+          borderRadius: "0 0 24px 24px",
+          boxShadow: "0 6px 12px rgba(0,0,0,0.15)"
         }}
         animate={{ y: [0, -1.5, 0] }}
         transition={{ duration: 3 + index * 0.2, repeat: Infinity, ease: "easeInOut" }}
       />
-      
+
       {/* Head */}
       <div
-        style={{ 
-          height: `${char.height * 0.42}px`, 
-          backgroundColor: char.color, 
-          borderRadius: "50% 50% 0 0", 
-          position: "absolute", 
-          left: 0, 
-          right: 0, 
-          top: 0, 
-          boxShadow: "0 4px 8px rgba(0,0,0,0.1)" 
+        style={{
+          height: `${char.height * 0.42}px`,
+          backgroundColor: char.color,
+          borderRadius: "50% 50% 0 0",
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
         }}
       >
         {/* Eyebrows */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-7">
           {loginState === "error" ? (
             <>
-              <motion.div 
-                className="w-10 h-1.5 bg-black/90 rounded-full" 
+              <motion.div
+                className="w-10 h-1.5 bg-black/90 rounded-full"
                 style={{ transform: "rotate(18deg) translateY(-2px)" }}
                 initial={{ scaleX: 1 }}
                 animate={{ scaleX: [1, 0.95, 1] }}
                 transition={{ duration: 0.3 }}
               />
-              <motion.div 
-                className="w-10 h-1.5 bg-black/90 rounded-full" 
+              <motion.div
+                className="w-10 h-1.5 bg-black/90 rounded-full"
                 style={{ transform: "rotate(-18deg) translateY(-2px)" }}
                 initial={{ scaleX: 1 }}
                 animate={{ scaleX: [1, 0.95, 1] }}
@@ -163,26 +164,26 @@ function Character({ index, char, mousePos, isTypingPassword, showPassword, logi
             </>
           ) : isTypingPassword && showPassword ? (
             <>
-              <motion.div 
-                className="w-10 h-1.5 bg-black/90 rounded-full" 
+              <motion.div
+                className="w-10 h-1.5 bg-black/90 rounded-full"
                 animate={{ rotate: -15, y: -3 }}
                 transition={spring}
               />
-              <motion.div 
-                className="w-10 h-1.5 bg-black/90 rounded-full" 
+              <motion.div
+                className="w-10 h-1.5 bg-black/90 rounded-full"
                 animate={{ rotate: 15, y: -3 }}
                 transition={spring}
               />
             </>
           ) : loginState === "success" ? (
             <>
-              <motion.div 
-                className="w-10 h-1.5 bg-black/90 rounded-full" 
+              <motion.div
+                className="w-10 h-1.5 bg-black/90 rounded-full"
                 animate={{ rotate: -12 }}
                 transition={spring}
               />
-              <motion.div 
-                className="w-10 h-1.5 bg-black/90 rounded-full" 
+              <motion.div
+                className="w-10 h-1.5 bg-black/90 rounded-full"
                 animate={{ rotate: 12 }}
                 transition={spring}
               />
@@ -201,7 +202,7 @@ function Character({ index, char, mousePos, isTypingPassword, showPassword, logi
             {loginState === "success" ? (
               // Happy closed eyes - curved smile shape
               <>
-                <motion.div 
+                <motion.div
                   className="w-11 h-6 flex items-center justify-center"
                   initial={{ scaleY: 1 }}
                   animate={{ scaleY: 0.3 }}
@@ -211,7 +212,7 @@ function Character({ index, char, mousePos, isTypingPassword, showPassword, logi
                     <path d="M 5 2 Q 20 14 35 2" stroke="black" strokeWidth="3" fill="none" strokeLinecap="round" />
                   </svg>
                 </motion.div>
-                <motion.div 
+                <motion.div
                   className="w-11 h-6 flex items-center justify-center"
                   initial={{ scaleY: 1 }}
                   animate={{ scaleY: 0.3 }}
@@ -226,29 +227,29 @@ function Character({ index, char, mousePos, isTypingPassword, showPassword, logi
               <>
                 {/* LEFT EYE */}
                 <div className="relative w-11 h-11 bg-white rounded-full flex items-center justify-center border-2 border-gray-800 overflow-hidden">
-                  <motion.div 
-                    animate={{ x: leftEyeTransform.x, y: leftEyeTransform.y }} 
-                    transition={spring} 
-                    style={{ 
-                      width: pupilSize.width, 
-                      height: pupilSize.height, 
-                      marginLeft: pupilSize.marginLeft 
-                    }} 
-                    className="bg-gray-900 rounded-full" 
+                  <motion.div
+                    animate={{ x: leftEyeTransform.x, y: leftEyeTransform.y }}
+                    transition={spring}
+                    style={{
+                      width: pupilSize.width,
+                      height: pupilSize.height,
+                      marginLeft: pupilSize.marginLeft
+                    }}
+                    className="bg-gray-900 rounded-full"
                   />
                 </div>
-                
+
                 {/* RIGHT EYE */}
                 <div className="relative w-11 h-11 bg-white rounded-full flex items-center justify-center border-2 border-gray-800 overflow-hidden">
-                  <motion.div 
-                    animate={{ x: rightEyeTransform.x, y: rightEyeTransform.y }} 
-                    transition={spring} 
-                    style={{ 
-                      width: pupilSize.width, 
-                      height: pupilSize.height, 
-                      marginLeft: pupilSize.marginLeft 
-                    }} 
-                    className="bg-gray-900 rounded-full" 
+                  <motion.div
+                    animate={{ x: rightEyeTransform.x, y: rightEyeTransform.y }}
+                    transition={spring}
+                    style={{
+                      width: pupilSize.width,
+                      height: pupilSize.height,
+                      marginLeft: pupilSize.marginLeft
+                    }}
+                    className="bg-gray-900 rounded-full"
                   />
                 </div>
               </>
@@ -267,12 +268,12 @@ function Character({ index, char, mousePos, isTypingPassword, showPassword, logi
                 exit={{ y: -50, opacity: 0 }}
                 transition={{ duration: 0.08, ease: "easeInOut" }}
                 className="absolute left-0 right-0 top-0 h-1/2 bg-gradient-to-b from-gray-900/95 to-transparent pointer-events-none"
-                style={{ 
+                style={{
                   borderRadius: "50% 50% 0 0",
                   backdropFilter: "blur(1px)"
                 }}
               />
-              
+
               {/* Bottom Eyelid */}
               <motion.div
                 initial={{ y: 50, opacity: 0 }}
@@ -280,12 +281,12 @@ function Character({ index, char, mousePos, isTypingPassword, showPassword, logi
                 exit={{ y: 50, opacity: 0 }}
                 transition={{ duration: 0.08, ease: "easeInOut" }}
                 className="absolute left-0 right-0 bottom-0 h-1/2 bg-gradient-to-t from-gray-900/95 to-transparent pointer-events-none"
-                style={{ 
+                style={{
                   borderRadius: "0 0 50% 50%",
                   backdropFilter: "blur(1px)"
                 }}
               />
-              
+
               {/* Eyelid line in the middle */}
               <motion.div
                 initial={{ scaleX: 0 }}
@@ -297,19 +298,19 @@ function Character({ index, char, mousePos, isTypingPassword, showPassword, logi
             </>
           )}
         </AnimatePresence>
-        
+
         {/* Blush when happy or embarrassed */}
         {(loginState === "success" || (isTypingPassword && showPassword)) && (
           <>
-            <motion.div 
+            <motion.div
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 0.5 }}
-              className="absolute left-2 top-1/2 w-7 h-5 bg-pink-400/60 rounded-full blur-sm" 
+              className="absolute left-2 top-1/2 w-7 h-5 bg-pink-400/60 rounded-full blur-sm"
             />
-            <motion.div 
+            <motion.div
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 0.5 }}
-              className="absolute right-2 top-1/2 w-7 h-5 bg-pink-400/60 rounded-full blur-sm" 
+              className="absolute right-2 top-1/2 w-7 h-5 bg-pink-400/60 rounded-full blur-sm"
             />
           </>
         )}
@@ -318,19 +319,19 @@ function Character({ index, char, mousePos, isTypingPassword, showPassword, logi
       {/* Mouth */}
       <div className="absolute left-0 right-0 bottom-14 flex items-center justify-center pointer-events-none">
         {loginState === "error" ? (
-          <motion.svg 
-            width="50" 
-            height="25" 
+          <motion.svg
+            width="50"
+            height="25"
             viewBox="0 0 50 25"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
             transition={{ duration: 0.3 }}
           >
-            <motion.path 
-              d="M 8 18 Q 25 8 42 18" 
-              stroke="black" 
-              strokeWidth="3" 
-              fill="none" 
+            <motion.path
+              d="M 8 18 Q 25 8 42 18"
+              stroke="black"
+              strokeWidth="3"
+              fill="none"
               strokeLinecap="round"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
@@ -343,11 +344,11 @@ function Character({ index, char, mousePos, isTypingPassword, showPassword, logi
             transition={{ type: "spring", stiffness: 300, damping: 15 }}
           >
             <svg width="60" height="30" viewBox="0 0 60 30">
-              <motion.path 
-                d="M 8 8 Q 30 28 52 8" 
-                stroke="black" 
-                strokeWidth="3" 
-                fill="none" 
+              <motion.path
+                d="M 8 8 Q 30 28 52 8"
+                stroke="black"
+                strokeWidth="3"
+                fill="none"
                 strokeLinecap="round"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
@@ -364,7 +365,7 @@ function Character({ index, char, mousePos, isTypingPassword, showPassword, logi
 
       {/* Tear drop for error */}
       {loginState === "error" && (
-        <motion.div 
+        <motion.div
           initial={{ y: -10, opacity: 0, scale: 0 }}
           animate={{ y: 0, opacity: 1, scale: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 10 }}
@@ -376,10 +377,10 @@ function Character({ index, char, mousePos, isTypingPassword, showPassword, logi
 
       {/* Sparkle for success */}
       {loginState === "success" && (
-        <motion.div 
-          initial={{ opacity: 0, y: 10, scale: 0.5, rotate: -45 }} 
-          animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }} 
-          transition={{ delay: index * 0.08, duration: 0.5, type: "spring" }} 
+        <motion.div
+          initial={{ opacity: 0, y: 10, scale: 0.5, rotate: -45 }}
+          animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
+          transition={{ delay: index * 0.08, duration: 0.5, type: "spring" }}
           className="absolute -top-8 left-1/2 -translate-x-1/2 text-2xl pointer-events-none drop-shadow-lg"
         >
           ✨
@@ -426,7 +427,7 @@ export default function AnimatedMascots({ mousePos, isTypingPassword, showPasswo
           >
             <motion.div
               initial={{ scale: 0.5, rotate: -20 }}
-              animate={{ 
+              animate={{
                 scale: [1, 1.3, 1.1],
                 rotate: [0, 10, -10, 0]
               }}
@@ -439,13 +440,13 @@ export default function AnimatedMascots({ mousePos, isTypingPassword, showPasswo
             >
               🎉
             </motion.div>
-            
+
             {/* Floating sparkles */}
             {[...Array(6)].map((_, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, scale: 0 }}
-                animate={{ 
+                animate={{
                   opacity: [0, 1, 0],
                   scale: [0, 1.5, 0],
                   x: [0, (i % 2 ? 1 : -1) * (50 + i * 20)],

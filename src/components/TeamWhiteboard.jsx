@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Excalidraw, exportToBlob } from "@excalidraw/excalidraw";
+import { Excalidraw } from "@excalidraw/excalidraw";
 import { db } from '../firebaseConfig';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 
@@ -22,8 +22,8 @@ function TeamWhiteboard({ teamId }) {
           // immediately re-trigger a save loop.
           isSyncingFromFirebase.current = true;
           excalidrawAPI.updateScene({
-             elements: JSON.parse(data.elements),
-             appState: data.appState ? JSON.parse(data.appState) : undefined
+            elements: JSON.parse(data.elements),
+            appState: data.appState ? JSON.parse(data.appState) : undefined
           });
           setStatus('Synced');
           // Reset flag after a moment
@@ -32,6 +32,9 @@ function TeamWhiteboard({ teamId }) {
       } else {
         setStatus('Ready');
       }
+    }, (err) => {
+      console.error("Error syncing whiteboard:", err);
+      setStatus('Offline Mode (Access Denied)');
     });
 
     return () => unsubscribe();
@@ -65,7 +68,7 @@ function TeamWhiteboard({ teamId }) {
 
   return (
     <div className="h-full w-full bg-gray-900 flex flex-col">
-       <div className="bg-gray-800 p-2 border-b border-gray-700 flex justify-between items-center text-sm">
+      <div className="bg-gray-800 p-2 border-b border-gray-700 flex justify-between items-center text-sm">
         <span className="text-green-400 font-semibold ml-4">Framework Design Space (Excalidraw)</span>
         <span className={`mr-4 ${status === 'Saved' || status === 'Synced' ? 'text-gray-400' : 'text-yellow-400'}`}>
           {status}
@@ -77,7 +80,7 @@ function TeamWhiteboard({ teamId }) {
           onChange={handleChange}
           theme="dark"
           UIOptions={{
-             canvasActions: { loadScene: false, saveToActiveFile: false }
+            canvasActions: { loadScene: false, saveToActiveFile: false }
           }}
         />
       </div>

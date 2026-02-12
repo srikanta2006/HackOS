@@ -1,32 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { db } from '../firebaseConfig';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'; 
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import CreatePostModal from '../components/CreatePostModal';
 import { LftPostSkeleton } from '../components/LoadingSkeletons.jsx';
 
 function HackathonDetailPage() {
   const { id } = useParams();
-  const { currentUser } = useAuth(); 
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
-  
+
   const [hackathon, setHackathon] = useState(null);
   const [lftPosts, setLftPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchLftPosts = async () => {
+  const fetchLftPosts = React.useCallback(async () => {
     try {
       const lftCollection = collection(db, 'lftPosts');
-      
+
       const q = query(
-        lftCollection, 
+        lftCollection,
         where("hackathonId", "==", id)
       );
-      
+
       const querySnapshot = await getDocs(q);
       const allPosts = querySnapshot.docs.map(doc => ({
         id: doc.id,
@@ -44,20 +44,20 @@ function HackathonDetailPage() {
         const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
         return dateB - dateA;
       });
-      
+
       setLftPosts(openPosts);
     } catch (err) {
       console.error("Error fetching LFT posts: ", err);
       setError('Failed to load team posts.');
     }
-  };
-  
+  }, [id]);
+
   useEffect(() => {
     const fetchHackathonDetails = async () => {
       try {
         setLoading(true);
         setError('');
-        
+
         const docRef = doc(db, 'hackathons', id);
         const docSnap = await getDoc(docRef);
 
@@ -68,9 +68,9 @@ function HackathonDetailPage() {
           setLoading(false);
           return;
         }
-        
+
         await fetchLftPosts();
-        
+
       } catch (err) {
         console.error("Error fetching details: ", err);
         setError('Failed to load hackathon details.');
@@ -80,7 +80,7 @@ function HackathonDetailPage() {
     };
 
     fetchHackathonDetails();
-  }, [id]);
+  }, [id, fetchLftPosts]);
 
   const handleOpenModal = () => {
     if (currentUser) {
@@ -91,19 +91,19 @@ function HackathonDetailPage() {
   };
 
   const handlePostCreated = () => {
-    fetchLftPosts(); 
+    fetchLftPosts();
   };
 
   if (loading) {
-   return (
-  <div className="space-y-6">
-    {loading ? (
-      [...Array(3)].map((_, i) => <LftPostSkeleton key={i} />)
-    ) : (
-      posts.map(post => <LftPostCard key={post.id} post={post} />)
-    )}
-  </div>
-);
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+          <div className="space-y-6">
+            {[...Array(3)].map((_, i) => <LftPostSkeleton key={i} />)}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -129,28 +129,28 @@ function HackathonDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        
+
         {/* Hackathon Hero Section */}
         <div className="relative bg-gradient-to-r from-gray-800/50 to-gray-800/30 backdrop-blur border border-gray-700 rounded-3xl p-8 md:p-12 mb-12 shadow-2xl overflow-hidden">
           {/* Decorative Elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/5 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl"></div>
-          
+
           <div className="relative z-10">
             {/* Event Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 rounded-full border border-green-500/30 mb-6">
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
               <span className="text-green-400 text-sm font-bold uppercase tracking-wide">Live Event</span>
             </div>
-            
+
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
               {hackathon.name}
             </h1>
-            
+
             <p className="text-gray-300 text-lg md:text-xl mb-6 leading-relaxed max-w-4xl">
               {hackathon.description}
             </p>
-            
+
             {/* Event Details */}
             <div className="flex flex-wrap gap-6">
               <div className="flex items-center gap-3 px-4 py-2 bg-gray-900/50 rounded-xl border border-gray-700">
@@ -164,7 +164,7 @@ function HackathonDetailPage() {
                   <p className="text-white font-bold">{hackathon.startDate}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3 px-4 py-2 bg-gray-900/50 rounded-xl border border-gray-700">
                 <div className="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center">
                   <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,7 +176,7 @@ function HackathonDetailPage() {
                   <p className="text-white font-bold">{hackathon.endDate}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3 px-4 py-2 bg-gray-900/50 rounded-xl border border-gray-700">
                 <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
                   <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -205,8 +205,8 @@ function HackathonDetailPage() {
               <p className="text-sm text-gray-400">Browse teams or create your own</p>
             </div>
           </div>
-          
-          <button 
+
+          <button
             onClick={handleOpenModal}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold transition-all duration-300 shadow-lg shadow-green-500/25 hover:shadow-green-500/40 hover:scale-105"
           >
@@ -221,8 +221,8 @@ function HackathonDetailPage() {
         <div className="space-y-4">
           {lftPosts.length > 0 ? (
             lftPosts.map(post => (
-              <div 
-                key={post.id} 
+              <div
+                key={post.id}
                 className="group bg-gray-800/50 backdrop-blur border border-gray-700 rounded-2xl p-6 hover:bg-gray-800/80 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10"
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -237,13 +237,13 @@ function HackathonDetailPage() {
                           </svg>
                         </div>
                       </div>
-                      
+
                       {/* Post Details */}
                       <div className="flex-1 min-w-0">
                         <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
                           {post.postTitle}
                         </h3>
-                        
+
                         <div className="flex flex-wrap items-center gap-3 mb-3">
                           <div className="flex items-center gap-1.5 text-sm text-gray-400">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -251,9 +251,9 @@ function HackathonDetailPage() {
                             </svg>
                             <span className="font-medium text-gray-300">{post.creatorName}</span>
                           </div>
-                          
+
                           <span className="text-gray-600">•</span>
-                          
+
                           <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-700/50 rounded-lg">
                             <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -263,7 +263,7 @@ function HackathonDetailPage() {
                             </span>
                           </div>
                         </div>
-                        
+
                         {/* Skills */}
                         {post.creatorSkills && (
                           <div className="flex items-start gap-2">
@@ -272,8 +272,8 @@ function HackathonDetailPage() {
                             </svg>
                             <div className="flex flex-wrap gap-2">
                               {post.creatorSkills.split(',').map((skill, idx) => (
-                                <span 
-                                  key={idx} 
+                                <span
+                                  key={idx}
                                   className="px-2 py-1 bg-blue-500/10 text-blue-300 text-xs font-semibold rounded-lg border border-blue-500/20"
                                 >
                                   {skill.trim()}
@@ -285,7 +285,7 @@ function HackathonDetailPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Right Section: Action Button */}
                   <div className="flex md:flex-col items-center md:items-end gap-3 md:gap-2 shrink-0">
                     {/* Team Size Display - Mobile */}
@@ -297,7 +297,7 @@ function HackathonDetailPage() {
                         {post.teamMembers.length} / {post.maxTeamSize}
                       </span>
                     </div>
-                    
+
                     <Link
                       to={`/post/${post.id}`}
                       className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 font-bold transition-all duration-300 border border-blue-500/30 hover:border-blue-500/50"
@@ -321,11 +321,11 @@ function HackathonDetailPage() {
               <h3 className="text-2xl font-bold text-gray-300 mb-3">No Teams Yet</h3>
               <p className="text-gray-400 mb-2">
                 No open teams found for this event yet.
-              </p> 
+              </p>
               <p className="text-gray-500 mb-8">
                 Be the first one! Click "Post Your Idea" to build your team.
               </p>
-              <button 
+              <button
                 onClick={handleOpenModal}
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold transition-all duration-300 shadow-lg shadow-green-500/25 hover:shadow-green-500/40 hover:scale-105"
               >
@@ -341,7 +341,7 @@ function HackathonDetailPage() {
       </div>
 
       {isModalOpen && (
-        <CreatePostModal 
+        <CreatePostModal
           hackathon={hackathon}
           onClose={() => setIsModalOpen(false)}
           onPostCreated={handlePostCreated}

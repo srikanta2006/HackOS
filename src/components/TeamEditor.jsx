@@ -1,78 +1,105 @@
-import React, { useState, useEffect, useRef } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css'; // Import professional styles
+import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { FileText, Link as LinkIcon } from 'lucide-react';
 
 function TeamEditor({ teamId }) {
-  const [content, setContent] = useState('');
-  const [status, setStatus] = useState('Loading...');
-  
-  // Refs to help manage real-time syncing without loops
-  const isLocalChange = useRef(false);
-  const timeoutRef = useRef(null);
+  const [editorUrl, setEditorUrl] = useState('');
+  const [savedUrl, setSavedUrl] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  // 1. Configure the Toolbar (just like Google Docs)
-  const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, false] }],
-      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-      [{'list': 'ordered'}, {'list': 'bullet'}],
-      ['link', 'code-block'],
-      ['clean']
-    ],
-  };
-
-  // 2. Real-time listener (Read from Firebase)
   useEffect(() => {
-    const docRef = doc(db, 'lftPosts', teamId, 'wiki', 'primary');
+    // Listen to the main team document for 'editorUrl'
+    const docRef = doc(db, 'lftPosts', teamId);
+
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (!isLocalChange.current) { // Only update if WE aren't actively typing
-        if (docSnap.exists()) {
-          setContent(docSnap.data().content || '');
-          setStatus('Saved');
-        } else {
-          setStatus('Ready to write...');
-        }
+      if (docSnap.exists()) {
+        setSavedUrl(docSnap.data().editorUrl || '');
       }
+      setLoading(false);
+    }, (err) => {
+      console.warn("Editor integration access denied (handled):", err.code);
+      setLoading(false);
     });
     return () => unsubscribe();
   }, [teamId]);
 
-  // 3. Handle local edits (Write to Firebase)
-  const handleChange = (html, delta, source) => {
-    if (source === 'user') {
-      isLocalChange.current = true;
-      setContent(html);
-      setStatus('Typing...');
-
-      // Debounce the save (wait 1s after last keystroke to save)
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(async () => {
-        setStatus('Saving...');
-        await setDoc(doc(db, 'lftPosts', teamId, 'wiki', 'primary'), { content: html }, { merge: true });
-        setStatus('Saved');
-        isLocalChange.current = false;
-      }, 1000);
+  const handleSaveUrl = async (e) => {
+    e.preventDefault();
+    if (!editorUrl.startsWith('http')) {
+      alert("Please enter a valid URL (e.g., Google Doc link)");
+      return;
     }
+    // Save to main document
+    await setDoc(doc(db, 'lftPosts', teamId), { editorUrl: editorUrl }, { merge: true });
   };
 
+  const handleReset = () => {
+    if (window.confirm("Disconnect this document?")) {
+      setDoc(doc(db, 'lftPosts', teamId), { editorUrl: '' }, { merge: true });
+    }
+  }
+
+  if (loading) return <div className="p-8 text-gray-400">Loading workspace...</div>;
+
   return (
-    <div className="h-full flex flex-col bg-white rounded-lg overflow-hidden">
-      {/* Status Bar */}
-      <div className="bg-gray-100 p-2 text-xs text-right text-gray-500 border-b border-gray-300">
-        {status}
+    <div className="h-full flex flex-col bg-gray-900">
+      <div className="bg-gray-800 p-3 border-b border-gray-700 flex justify-between items-center shrink-0">
+        <h3 className="text-blue-400 font-semibold flex items-center gap-2">
+          <FileText size={18} />
+          Collaborative Document
+        </h3>
+        {savedUrl && (
+          <div className="flex items-center gap-4">
+            <a
+              href={savedUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded transition flex items-center gap-1"
+            >
+              <LinkIcon size={12} /> Open in New Tab
+            </a>
+            <button onClick={handleReset} className="text-xs text-gray-400 hover:text-red-400">Change Doc</button>
+          </div>
+        )}
       </div>
-      
-      {/* The Quill Editor */}
-      <ReactQuill 
-        theme="snow"
-        value={content}
-        onChange={handleChange}
-        modules={modules}
-        className="h-full flex-1"
-        style={{ height: 'calc(100% - 40px)' }} // Adjust for status bar
-      />
+
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {savedUrl ? (
+          <iframe
+            src={savedUrl}
+            height="100%"
+            width="100%"
+            frameBorder="0"
+            allowFullScreen
+            className="flex-1 bg-white"
+          />
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center p-8">
+            <div className="bg-gray-800 p-8 rounded-lg shadow-xl max-w-md w-full">
+              <h2 className="text-xl font-bold text-white mb-4">Connect Document</h2>
+              <p className="text-gray-400 mb-6 text-sm">
+                Paste the link to your <strong>Google Doc</strong>, <strong>Notion Page</strong>, or other embeddable editor.
+              </p>
+              <form onSubmit={handleSaveUrl} className="space-y-4">
+                <input
+                  type="text"
+                  value={editorUrl}
+                  onChange={(e) => setEditorUrl(e.target.value)}
+                  placeholder="https://docs.google.com/document/d/..."
+                  className="w-full p-3 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="p-3 bg-blue-900/30 border border-blue-800 rounded text-blue-200 text-xs">
+                  <strong>Tip:</strong> For Google Docs, ensure the sharing setting is "Anyone with the link can edit" for best collaboration.
+                </div>
+                <button type="submit" className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded transition">
+                  Connect Document
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

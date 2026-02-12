@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { doc, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../firebaseConfig.js';
-import { cn, getButton, getBadge } from '../design-system/theme.js';
 
 function SubmitProjectModal({ teamId, teamName, onClose }) {
   const [step, setStep] = useState(1);
@@ -84,12 +83,12 @@ function SubmitProjectModal({ teamId, teamName, onClose }) {
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
         onClick={!isSubmitting ? onClose : undefined}
       >
         {/* Modal */}
-        <div 
+        <div
           className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl shadow-2xl w-full max-w-2xl border border-white/10 overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
@@ -117,13 +116,12 @@ function SubmitProjectModal({ teamId, teamName, onClose }) {
                 <React.Fragment key={s}>
                   <div className="relative flex flex-col items-center">
                     <div
-                      className={`w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold transition-all duration-300 ${
-                        s < step
+                      className={`w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold transition-all duration-300 ${s < step
                           ? 'bg-green-500 border-green-400 text-white scale-100'
                           : s === step
-                          ? 'bg-white border-white text-gray-900 scale-110 shadow-lg shadow-white/30'
-                          : 'bg-gray-800 border-gray-700 text-gray-500 scale-90'
-                      }`}
+                            ? 'bg-white border-white text-gray-900 scale-110 shadow-lg shadow-white/30'
+                            : 'bg-gray-800 border-gray-700 text-gray-500 scale-90'
+                        }`}
                     >
                       {s < step ? (
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -134,18 +132,16 @@ function SubmitProjectModal({ teamId, teamName, onClose }) {
                       )}
                     </div>
                     <span
-                      className={`absolute -bottom-6 text-xs font-medium whitespace-nowrap transition-all ${
-                        s === step ? 'text-white' : 'text-gray-500'
-                      }`}
+                      className={`absolute -bottom-6 text-xs font-medium whitespace-nowrap transition-all ${s === step ? 'text-white' : 'text-gray-500'
+                        }`}
                     >
                       {s === 1 ? 'Project URL' : s === 2 ? 'Description' : 'Confirm'}
                     </span>
                   </div>
                   {s < 3 && (
                     <div
-                      className={`flex-1 h-0.5 mx-2 transition-all duration-500 ${
-                        s < step ? 'bg-green-500' : 'bg-gray-700'
-                      }`}
+                      className={`flex-1 h-0.5 mx-2 transition-all duration-500 ${s < step ? 'bg-green-500' : 'bg-gray-700'
+                        }`}
                     />
                   )}
                 </React.Fragment>
@@ -239,9 +235,8 @@ function SubmitProjectModal({ teamId, teamName, onClose }) {
                     <p className="text-xs text-gray-500">
                       This will be visible on your public portfolio
                     </p>
-                    <span className={`text-xs font-medium ${
-                      finalDescription.length < 50 ? 'text-gray-600' : 'text-gray-400'
-                    }`}>
+                    <span className={`text-xs font-medium ${finalDescription.length < 50 ? 'text-gray-600' : 'text-gray-400'
+                      }`}>
                       {finalDescription.length} characters
                     </span>
                   </div>

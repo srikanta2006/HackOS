@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -24,8 +25,8 @@ export function HackathonLockProvider({ children }) {
     setLoading(true);
     // 1. Listen to ALL teams this user is a member of
     const q = query(
-        collection(db, 'lftPosts'), 
-        where('teamMembers', 'array-contains', currentUser.uid)
+      collection(db, 'lftPosts'),
+      where('teamMembers', 'array-contains', currentUser.uid)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -40,15 +41,15 @@ export function HackathonLockProvider({ children }) {
         // - It has NOT ended yet (hackathonEndsAt > now)
         // - It is NOT submitted yet (!isSubmitted)
         if (data.hackathonStartedAt && data.hackathonEndsAt?.toMillis() > now && !data.isSubmitted) {
-           activeLock = doc.id;
+          activeLock = doc.id;
         }
       });
 
       setLockedTeamId(activeLock);
       setLoading(false);
     }, (err) => {
-        console.error("Error checking locks:", err);
-        setLoading(false);
+      console.error("Error checking locks:", err);
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -56,13 +57,13 @@ export function HackathonLockProvider({ children }) {
 
   // 3. Extra safety: Re-check every minute (in case timer expires while sitting on page)
   useEffect(() => {
-     const interval = setInterval(() => {
-        // This forces a re-render of components using this context,
-        // which will re-eval the time check above if we stored the raw data.
-        // For simplicity in this MVP, we rely mainly on Firestore snapshot updates,
-        // but this placeholder is here if you need tighter minute-by-minute auto-unlocking later.
-     }, 60000);
-     return () => clearInterval(interval);
+    const interval = setInterval(() => {
+      // This forces a re-render of components using this context,
+      // which will re-eval the time check above if we stored the raw data.
+      // For simplicity in this MVP, we rely mainly on Firestore snapshot updates,
+      // but this placeholder is here if you need tighter minute-by-minute auto-unlocking later.
+    }, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   const value = {
