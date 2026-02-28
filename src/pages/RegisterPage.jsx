@@ -4,7 +4,7 @@ import { auth, db } from '../firebaseConfig';
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
-  GithubAuthProvider,      // <-- THIS IS THE FIX (lowercase 'h')
+  GithubAuthProvider,
   signInWithPopup
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -80,7 +80,7 @@ function RegisterPage() {
   };
 
   const handleGitHubLogin = () => {
-    handleSocialLogin(new GithubAuthProvider()); // <-- THIS IS THE FIX
+    handleSocialLogin(new GithubAuthProvider());
   };
 
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { db } from '../firebaseConfig.js';
-import { doc, onSnapshot, updateDoc, serverTimestamp, collection, query, where } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, collection, query, where } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext.jsx';
 
 // --- COMPONENTS ---
@@ -91,8 +91,7 @@ function TeamWorkspacePage() {
       try {
         const userRef = doc(db, 'users', currentUser.uid);
         await updateDoc(userRef, {
-          lastActive: serverTimestamp(),
-          currentTeam: teamId // Useful for knowing where they are
+          lastActive: Date.now()
         });
       } catch (err) {
         console.error("Heartbeat failed:", err);
@@ -102,7 +101,7 @@ function TeamWorkspacePage() {
     updatePresence(); // Initial
     const interval = setInterval(updatePresence, 30000); // Every 30s
     return () => clearInterval(interval);
-  }, [currentUser, teamId]);
+  }, [currentUser]);
 
   // 3. Handle Project Submission
   const handleSubmitProject = () => {
@@ -220,6 +219,7 @@ function TeamWorkspacePage() {
             teamMembers={teamMembers}
             maxTeamSize={team.maxTeamSize}
             creatorId={team.creatorId}
+            joinCode={team?.joinCode}
           />
         </div>
       </div>
