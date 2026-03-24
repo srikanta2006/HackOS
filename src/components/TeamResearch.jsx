@@ -22,7 +22,6 @@ import {
   Terminal,
   Database
 } from 'lucide-react';
-import { cn, colors, typography } from '../design-system/theme.js';
 
 function TeamResearch({ teamId }) {
   const { currentUser } = useAuth();
@@ -202,7 +201,10 @@ function TeamResearch({ teamId }) {
         const updatedInsights = (docSnap.data().researchInsights || []).filter(i => i.id !== insightId);
         await updateDoc(docRef, { researchInsights: updatedInsights });
       }
-    } catch (err) { setError("Purge Failed"); }
+    } catch (err) {
+      console.error("Purge error:", err);
+      setError("Purge Failed");
+    }
   };
 
   return (

@@ -10,7 +10,7 @@ import {
     Monitor
 } from 'lucide-react';
 import HackathonTimer from './HackathonTimer.jsx';
-import { cn, typography } from '../design-system/theme';
+import { cn } from '../design-system/theme';
 
 function WorkspaceHeader({
     displayTitle,

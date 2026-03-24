@@ -1,14 +1,41 @@
-import React from 'react';
-import { User, Shield, Zap, Circle } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Shield, Zap } from 'lucide-react';
 import { cn } from '../design-system/theme.js';
 
-function WorkspaceMembersSidebar({ teamMembers, maxTeamSize, creatorId }) {
+function WorkspaceMembersSidebar({
+    teamMembers,
+    maxTeamSize,
+    creatorId,
+    joinCode // ✅ added
+}) {
+
+    const [copying, setCopying] = useState(false);
 
     const isOnline = (lastActive) => {
         if (!lastActive) return false;
         const lastActiveMillis = lastActive.toMillis ? lastActive.toMillis() : lastActive;
-        // Consider online if active in the last 2 minutes
         return (Date.now() - lastActiveMillis) < 120000;
+    };
+
+    // ✅ Invite Copy Logic (Safe + Clean)
+    const handleCopyInvite = async () => {
+        if (!joinCode) {
+            alert("Join code not available");
+            return;
+        }
+
+        const inviteLink = `${window.location.origin}/join/${joinCode}`;
+
+        try {
+            setCopying(true);
+            await navigator.clipboard.writeText(inviteLink);
+            alert("Invite link copied to clipboard!");
+        } catch (err) {
+            console.error("Clipboard failed:", err);
+            alert("Failed to copy invite link");
+        } finally {
+            setCopying(false);
+        }
     };
 
     return (
@@ -57,7 +84,6 @@ function WorkspaceMembersSidebar({ teamMembers, maxTeamSize, creatorId }) {
                                         )}
                                     />
 
-                                    {/* Online Indicator Dot */}
                                     <div className={cn(
                                         "absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-4 border-[#0a0a0c] z-10",
                                         online ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]" : "bg-gray-600"
@@ -114,9 +140,17 @@ function WorkspaceMembersSidebar({ teamMembers, maxTeamSize, creatorId }) {
                         <Zap size={18} className="text-cyan-400 group-hover:scale-110 transition-transform" />
                         <span className="text-[9px] font-black uppercase text-white tracking-widest">Boost</span>
                     </button>
-                    <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group">
+
+                    {/* ✅ Updated Invite Button */}
+                    <button
+                        onClick={handleCopyInvite}
+                        disabled={copying}
+                        className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group"
+                    >
                         <User size={18} className="text-purple-400 group-hover:scale-110 transition-transform" />
-                        <span className="text-[9px] font-black uppercase text-white tracking-widest">Invite</span>
+                        <span className="text-[9px] font-black uppercase text-white tracking-widest">
+                            {copying ? "Copying..." : "Invite"}
+                        </span>
                     </button>
                 </div>
             </div>

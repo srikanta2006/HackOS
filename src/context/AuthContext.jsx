@@ -21,6 +21,11 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     // onAuthStateChanged is a Firebase listener
     // It runs whenever the user logs in or out
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, user => {
       setCurrentUser(user);
       setLoading(false); // We're done loading

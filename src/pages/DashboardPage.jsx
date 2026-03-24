@@ -4,14 +4,13 @@ import { db } from '../firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { Trophy, Rocket, Target, Zap, Users, LayoutDashboard } from 'lucide-react';
-import { cn, colors, typography } from '../design-system/theme';
+import { cn, typography } from '../design-system/theme';
 
 function DashboardPage() {
   const { currentUser } = useAuth();
   const [activeTeams, setActiveTeams] = useState([]);
   const [pastTeams, setPastTeams] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
 
   useEffect(() => {
