@@ -11,6 +11,7 @@ function DashboardPage() {
   const [activeTeams, setActiveTeams] = useState([]);
   const [pastTeams, setPastTeams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
 
   useEffect(() => {
@@ -128,6 +129,22 @@ function DashboardPage() {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-12 h-12 border-4 border-blue-500/20 border-b-blue-500 rounded-full animate-spin-slow"></div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-transparent">
+        <div className="text-center bg-white/[0.03] backdrop-blur-xl border border-red-500/30 rounded-[2rem] p-12 max-w-md">
+          <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">Error</h2>
+          <p className="text-red-400">{error}</p>
         </div>
       </div>
     );

@@ -2,15 +2,15 @@
 // HackOS Neo - Futuristic Design System
 
 export const colors = {
-  // Deep Neo Palette
+  // Deep Netflix Palette
   brand: {
-    primary: 'from-cyan-400 via-blue-500 to-purple-600',
-    secondary: 'from-pink-500 to-rose-500',
-    accent: 'cyan-400',
+    primary: 'from-red-600 to-red-800',
+    secondary: 'from-zinc-800 to-zinc-950',
+    accent: 'red-600',
     neon: {
-      cyan: 'shadow-[0_0_15px_rgba(34,211,238,0.4)]',
-      purple: 'shadow-[0_0_15px_rgba(168,85,247,0.4)]',
-      pink: 'shadow-[0_0_15px_rgba(236,72,153,0.4)]',
+      cyan: 'shadow-[0_0_15px_rgba(229,9,20,0.3)]',
+      purple: 'shadow-[0_0_15px_rgba(184,7,16,0.3)]',
+      pink: 'shadow-[0_0_15px_rgba(220,38,38,0.3)]',
     }
   },
 
@@ -24,11 +24,11 @@ export const colors = {
       glow: 'shadow-emerald-500/20',
     },
     danger: {
-      bg: 'bg-rose-500/10',
-      border: 'border-rose-500/20',
-      text: 'text-rose-400',
-      gradient: 'from-rose-500 to-red-600',
-      glow: 'shadow-rose-500/20',
+      bg: 'bg-red-500/10',
+      border: 'border-red-500/20',
+      text: 'text-red-400',
+      gradient: 'from-red-500 to-red-700',
+      glow: 'shadow-red-500/20',
     },
     warning: {
       bg: 'bg-amber-500/10',
@@ -38,98 +38,95 @@ export const colors = {
       glow: 'shadow-amber-500/20',
     },
     info: {
-      bg: 'bg-sky-500/10',
-      border: 'border-sky-500/20',
-      text: 'text-sky-400',
-      gradient: 'from-sky-500 to-blue-600',
-      glow: 'shadow-sky-500/20',
+      bg: 'bg-[#181818]',
+      border: 'border-zinc-800',
+      text: 'text-zinc-300',
+      gradient: 'from-zinc-700 to-zinc-900',
+      glow: 'shadow-zinc-500/20',
     },
   },
 
-  // Background Layers (Neo-Glass)
+  // Background Layers (Netflix Dark)
   bg: {
-    base: 'bg-[#030712]', // Deeper black
-    gradient: 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-gray-950 to-black',
-    card: 'bg-white/[0.03] backdrop-blur-xl border border-white/10',
-    cardHover: 'bg-white/[0.06] border-white/20',
-    elevated: 'bg-gray-900/40 backdrop-blur-2xl border border-white/10',
-    input: 'bg-black/40 border-white/5',
-    inputHover: 'bg-black/60 border-white/10',
+    base: 'bg-[#141414]', // Netflix rich black
+    gradient: 'bg-gradient-to-b from-[#181818] via-[#141414] to-[#141414]',
+    card: 'bg-[#181818] border border-zinc-800/80',
+    cardHover: 'bg-[#232323] border-zinc-700',
+    elevated: 'bg-[#1c1c1c] border border-zinc-800',
+    input: 'bg-[#333] border-none',
+    inputHover: 'bg-[#444] border-none',
   },
 
   // Borders
   border: {
-    subtle: 'border-white/5',
-    default: 'border-white/10',
-    strong: 'border-white/20',
-    neon: 'border-cyan-400/50',
+    subtle: 'border-zinc-800/50',
+    default: 'border-zinc-800',
+    strong: 'border-zinc-700',
+    neon: 'border-red-600/50',
   },
 
   // Text
   text: {
-    primary: 'text-white',
-    secondary: 'text-gray-300',
-    tertiary: 'text-gray-400',
-    muted: 'text-gray-500',
-    gradient: 'bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500',
+    primary: 'text-[#e5e5e5]',
+    secondary: 'text-[#a3a3a3]',
+    tertiary: 'text-[#777777]',
+    muted: 'text-[#555555]',
+    gradient: 'bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-700',
   },
 };
 
 export const buttons = {
   primary: `
-    px-6 py-3 rounded-2xl 
-    bg-gradient-to-r from-cyan-500 to-blue-600 
+    px-6 py-2.5 rounded-md 
+    bg-[#E50914] hover:bg-[#B80710] 
     text-white font-bold 
-    transition-all duration-300 
-    shadow-[0_0_20px_rgba(6,182,212,0.3)]
-    hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]
-    hover:scale-[1.02] active:scale-[0.98]
+    transition-all duration-200 
+    hover:scale-[1.01] active:scale-[0.99]
     disabled:opacity-50 disabled:cursor-not-allowed
   `,
   secondary: `
-    px-6 py-3 rounded-2xl 
-    bg-white/5 hover:bg-white/10 
+    px-6 py-2.5 rounded-md 
+    bg-zinc-800/80 hover:bg-zinc-700 
     text-white font-bold 
-    transition-all duration-300 
-    border border-white/10 hover:border-white/20
-    backdrop-blur-md
+    transition-all duration-200 
+    border border-zinc-700 hover:border-zinc-600
   `,
   ghost: `
-    px-6 py-3 rounded-2xl 
-    text-gray-400 hover:text-white 
-    hover:bg-white/5 
-    transition-all duration-300
+    px-6 py-2.5 rounded-md 
+    text-zinc-400 hover:text-white 
+    hover:bg-zinc-800/40 
+    transition-all duration-200
   `,
   outline: `
-    px-6 py-3 rounded-2xl 
-    bg-transparent border border-cyan-500/50
-    text-cyan-400 hover:bg-cyan-500/10 
-    transition-all duration-300
+    px-6 py-2.5 rounded-md 
+    bg-transparent border border-red-600/70
+    text-red-500 hover:bg-red-600/10 
+    transition-all duration-200
   `
 };
 
 export const cards = {
   neo: `
-    bg-white/[0.03] backdrop-blur-xl 
-    border border-white/10 
-    rounded-[2rem] 
-    shadow-2xl shadow-black/50
-    transition-all duration-500
+    bg-[#181818] 
+    border border-zinc-800/60 
+    rounded-xl 
+    shadow-xl shadow-black/80
+    transition-all duration-300
   `,
   interactive: `
-    bg-white/[0.03] backdrop-blur-xl 
-    border border-white/10 
-    rounded-[2rem] 
-    shadow-2xl shadow-black/50
-    transition-all duration-500
-    hover:bg-white/[0.05] hover:border-white/20
-    hover:translate-y--1 hover:shadow-cyan-500/5
+    bg-[#181818] 
+    border border-zinc-800/60 
+    rounded-xl 
+    shadow-xl shadow-black/80
+    transition-all duration-300
+    hover:bg-[#232323] hover:border-zinc-700
+    hover:scale-[1.03]
     cursor-pointer active:scale-[0.99]
   `,
   glass: `
-    bg-black/20 backdrop-blur-md
-    border border-white/5
-    rounded-2xl
+    bg-[#1f1f1f]
+    border border-zinc-800
+    rounded-xl
   `
 };
 
@@ -141,12 +138,12 @@ export const layout = {
 };
 
 export const typography = {
-  h1: 'text-5xl md:text-7xl font-black tracking-tighter text-white leading-[1.1]',
-  h2: 'text-4xl md:text-5xl font-extrabold tracking-tight text-white',
-  h3: 'text-2xl md:text-3xl font-bold text-white',
-  body: 'text-lg text-gray-400 leading-relaxed',
-  label: 'text-xs font-black uppercase tracking-[0.2em] text-gray-500',
-  gradient: 'bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500',
+  h1: 'text-4xl md:text-6xl font-extrabold tracking-tight text-white leading-tight',
+  h2: 'text-3xl md:text-4xl font-bold tracking-tight text-white',
+  h3: 'text-xl md:text-2xl font-bold text-white',
+  body: 'text-base text-[#e5e5e5] leading-relaxed',
+  label: 'text-xs font-bold uppercase tracking-wider text-zinc-500',
+  gradient: 'bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-700',
 };
 
 // Helper Utilities

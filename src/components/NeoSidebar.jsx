@@ -50,19 +50,19 @@ const NeoSidebar = () => {
                 {/* Toggle Button */}
                 <button
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="absolute -right-3 top-10 w-6 h-6 rounded-full bg-cyan-500 flex items-center justify-center text-gray-950 shadow-[0_0_15px_rgba(6,182,212,0.5)] z-10 hover:scale-110 transition-transform"
+                    className="absolute -right-3 top-10 w-6 h-6 rounded-full bg-[#E50914] flex items-center justify-center text-white shadow-[0_0_15px_rgba(229,9,20,0.5)] z-10 hover:scale-110 transition-transform"
                 >
                     {isExpanded ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
                 </button>
 
                 {/* Logo Section */}
                 <Link to="/" className="flex items-center gap-3 px-2 mb-10 overflow-hidden">
-                    <div className="w-10 h-10 bg-gradient-to-tr from-cyan-400 to-blue-600 rounded-xl flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(6,182,212,0.3)]">
-                        <span className="text-gray-950 font-black text-xl leading-none">H</span>
+                    <div className="w-10 h-10 bg-[#E50914] rounded-md flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(229,9,20,0.3)]">
+                        <span className="text-white font-black text-xl leading-none">H</span>
                     </div>
                     {isExpanded && (
                         <span className="text-2xl font-black text-white tracking-tighter animate-fade-in whitespace-nowrap">
-                            Hack<span className="text-cyan-400">OS</span>
+                            HACK<span className="text-[#E50914]">FLIX</span>
                         </span>
                     )}
                 </Link>
@@ -76,9 +76,9 @@ const NeoSidebar = () => {
                                 key={item.path}
                                 to={item.path}
                                 className={({ isActive }) => cn(
-                                    "flex items-center gap-4 px-3 py-3 rounded-2xl transition-all duration-300 group relative",
+                                    "flex items-center gap-4 px-3 py-3 rounded-md transition-all duration-300 group relative",
                                     isActive
-                                        ? "bg-cyan-500/10 text-cyan-400"
+                                        ? "bg-red-500/10 text-red-500"
                                         : "text-gray-400 hover:text-white hover:bg-white/5"
                                 )}
                             >
@@ -94,7 +94,7 @@ const NeoSidebar = () => {
                                     </span>
                                 )}
                                 {/* Active Indicator Glow */}
-                                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3 bg-cyan-400 rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity" />
+                                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3 bg-red-600 rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity" />
                             </NavLink>
                         );
                     })}
@@ -107,13 +107,13 @@ const NeoSidebar = () => {
                             <NavLink
                                 to="/profile"
                                 className={({ isActive }) => cn(
-                                    "flex items-center gap-4 px-3 py-3 rounded-2xl transition-all duration-300 group",
+                                    "flex items-center gap-4 px-3 py-3 rounded-md transition-all duration-300 group",
                                     isActive
-                                        ? "bg-purple-500/10 text-purple-400"
+                                        ? "bg-red-500/10 text-red-500"
                                         : "text-gray-400 hover:text-white hover:bg-white/5"
                                 )}
                             >
-                                <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20 shrink-0">
+                                <div className="w-6 h-6 rounded-md overflow-hidden border border-white/20 shrink-0">
                                     <img src={`https://api.dicebear.com/9.x/initials/svg?seed=${currentUser.uid}`} alt="avatar" />
                                 </div>
                                 {isExpanded && (
@@ -125,7 +125,7 @@ const NeoSidebar = () => {
                             </NavLink>
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-4 w-full px-3 py-3 rounded-2xl text-gray-400 hover:text-rose-400 hover:bg-rose-500/5 transition-all duration-300 group"
+                                className="flex items-center gap-4 w-full px-3 py-3 rounded-md text-gray-400 hover:text-red-400 hover:bg-red-500/5 transition-all duration-300 group"
                             >
                                 <LogOut size={20} className="shrink-0 group-hover:translate-x-1 transition-transform" />
                                 {isExpanded && <span className="text-sm font-bold tracking-wide">Logout</span>}
@@ -134,7 +134,7 @@ const NeoSidebar = () => {
                     ) : (
                         <Link
                             to="/login"
-                            className="flex items-center justify-center gap-2 w-full px-3 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black text-sm shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:scale-105 active:scale-95 transition-all"
+                            className="flex items-center justify-center gap-2 w-full px-3 py-4 rounded-md bg-[#E50914] text-white font-black text-sm shadow-[0_0_20px_rgba(229,9,20,0.3)] hover:bg-[#B80710] hover:scale-105 active:scale-95 transition-all"
                         >
                             <User size={18} />
                             {isExpanded && <span>Login</span>}
